@@ -1,8 +1,10 @@
 package cn.gransier.config;
 
+import cn.gransier.annotation.AgentMethod;
+import cn.gransier.annotation.AgentParam;
 import cn.gransier.common.DefaultDifyStreamListener;
-import cn.gransier.domain.query.AgentQuery;
 import cn.gransier.util.DifyClient;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -11,7 +13,10 @@ import reactor.core.publisher.Flux;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationHandler, BeanFactoryAware {
 
@@ -57,23 +62,55 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
             }
         }
 
-        String methodName = method.getName();
-        if ("completions".equals(methodName)) {
-            return handleCompletions(method, args);
+        AgentMethod annotation = method.getAnnotation(AgentMethod.class);
+        if (annotation != null) {
+            return handleAgentMethod(method, args, annotation);
         }
-        
-        System.out.println("AgentService代理: 调用方法 " + methodName);
+
+        System.out.println("AgentService代理: 调用方法 " + method.getName());
         return null;
     }
 
-    private Flux<String> handleCompletions(Method method, Object[] args) {
-        AgentQuery agentQuery = (AgentQuery) args[0];
+    private Object buildRequestBody(Method method, Object[] args) {
+        Parameter[] parameters = method.getParameters();
+        
+        if (parameters.length == 1) {
+            Object arg = args[0];
+            if (arg != null && !isPrimitive(arg.getClass())) {
+                return arg;
+            }
+        }
+        
+        Map<String, Object> body = new HashMap<>();
+        for (int i = 0; i < parameters.length; i++) {
+            AgentParam paramAnnotation = parameters[i].getAnnotation(AgentParam.class);
+            String paramName = paramAnnotation != null ? paramAnnotation.value() : parameters[i].getName();
+            body.put(paramName, args[i]);
+        }
+        return body;
+    }
+
+    private boolean isPrimitive(Class<?> clazz) {
+        return clazz.isPrimitive() || clazz == String.class || clazz == Integer.class || 
+               clazz == Long.class || clazz == Boolean.class || clazz == Double.class;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Object handleAgentMethod(Method method, Object[] args, AgentMethod annotation) {
         DifyClient difyClient = getDifyClient();
-        return Flux.create(sink -> difyClient.stream(
-                "app-gItXxmtOzXp7S6TdJb7TNcdF",
-                "/v1/chat-messages",
-                agentQuery,
+        Object requestBody = buildRequestBody(method, args);
+
+        Flux<String> flux = Flux.create(sink -> difyClient.stream(
+                annotation.apiKey(),
+                annotation.endpoint(),
+                requestBody,
+                (JsonNode node) -> {
+                    String key = annotation.responseKey();
+                    JsonNode value = node.get(key);
+                    return value != null ? value.asText() : "";
+                },
                 DefaultDifyStreamListener.newInstance(sink)
         ));
+        return flux;
     }
 }
