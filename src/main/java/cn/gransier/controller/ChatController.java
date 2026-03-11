@@ -4,6 +4,7 @@ import cn.gransier.common.DefaultDifyStreamListener;
 import cn.gransier.domain.query.AgentQuery;
 import cn.gransier.domain.query.ChatCompleteQuery;
 import cn.gransier.domain.query.ChatQuery;
+import cn.gransier.service.AgentService;
 import cn.gransier.util.DifyClient;
 //import com.cx.aiot.common.core.web.domain.ApiResult;
 import io.swagger.annotations.ApiOperation;
@@ -19,7 +20,7 @@ import javax.annotation.Resource;
 public class ChatController {
 
     @Resource
-    private DifyClient difyClient;
+    private AgentService agentService;
 
 //        /**
 //     * 获取聊天列表
@@ -41,11 +42,6 @@ public class ChatController {
     public Flux<String> completions(ChatCompleteQuery query) {
         AgentQuery agentQuery = new AgentQuery(query.getContent(), "user-123", query.getChatId(), query.isStream());
 
-        return Flux.create(sink -> difyClient.stream(
-                "app-gItXxmtOzXp7S6TdJb7TNcdF",
-                "/v1/chat-messages",
-                agentQuery,
-                DefaultDifyStreamListener.newInstance(sink)
-        ));
+        return agentService.completions(agentQuery);
     }
 }
