@@ -5,6 +5,7 @@ import cn.gransier.annotation.AgentParam;
 import cn.gransier.common.DefaultDifyStreamListener;
 import cn.gransier.util.DifyClient;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -28,7 +29,7 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    public void setBeanFactory(@NonNull BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
     }
 
@@ -52,35 +53,23 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getDeclaringClass() == Object.class) {
-            if ("toString".equals(method.getName())) {
-                return "AgentServiceProxy@" + System.identityHashCode(proxy);
-            } else if ("hashCode".equals(method.getName())) {
-                return System.identityHashCode(proxy);
-            } else if ("equals".equals(method.getName())) {
-                return proxy == args[0];
-            }
-        }
-
         AgentMethod annotation = method.getAnnotation(AgentMethod.class);
         if (annotation != null) {
             return handleAgentMethod(method, args, annotation);
         }
-
-        System.out.println("AgentService代理: 调用方法 " + method.getName());
-        return null;
+        throw new RuntimeException("代理方法必须使用@AgentMethod注解");
     }
 
     private Object buildRequestBody(Method method, Object[] args) {
         Parameter[] parameters = method.getParameters();
-        
+
         if (parameters.length == 1) {
             Object arg = args[0];
             if (arg != null && !isPrimitive(arg.getClass())) {
                 return arg;
             }
         }
-        
+
         Map<String, Object> body = new HashMap<>();
         for (int i = 0; i < parameters.length; i++) {
             AgentParam paramAnnotation = parameters[i].getAnnotation(AgentParam.class);
@@ -91,26 +80,20 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     }
 
     private boolean isPrimitive(Class<?> clazz) {
-        return clazz.isPrimitive() || clazz == String.class || clazz == Integer.class || 
-               clazz == Long.class || clazz == Boolean.class || clazz == Double.class;
+        return clazz.isPrimitive() || clazz == String.class || clazz == Integer.class ||
+                clazz == Long.class || clazz == Boolean.class || clazz == Double.class;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("all")
     private Object handleAgentMethod(Method method, Object[] args, AgentMethod annotation) {
         DifyClient difyClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
 
-        Flux<String> flux = Flux.create(sink -> difyClient.stream(
+        return Flux.<String>create(sink -> difyClient.stream(
                 annotation.apiKey(),
                 annotation.endpoint(),
                 requestBody,
-                (JsonNode node) -> {
-                    String key = annotation.responseKey();
-                    JsonNode value = node.get(key);
-                    return value != null ? value.asText() : "";
-                },
                 DefaultDifyStreamListener.newInstance(sink)
         ));
-        return flux;
     }
 }

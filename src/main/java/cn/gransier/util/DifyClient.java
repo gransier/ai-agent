@@ -1,10 +1,10 @@
 package cn.gransier.util;
 
 import cn.gransier.common.DifyStreamListener;
+import cn.gransier.domain.response.AgentResponse;
 import lombok.Getter;
 import lombok.NonNull;
 import okhttp3.*;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 
 @Component
 public class DifyClient {
@@ -42,21 +41,19 @@ public class DifyClient {
      * @param apiKey           Dify API Key
      * @param endpoint         接口路径，如 "v1/chat-messages"
      * @param requestBody      请求体（会自动转为 JSON）
-     * @param contentExtractor 从 event 中提取内容的函数，默认提取 "answer" 字段
      * @param listener         流式回调监听器
      */
     public void stream(
             String apiKey,
             String endpoint,
             Object requestBody,
-            Function<JsonNode, String> contentExtractor,
             DifyStreamListener listener) {
 
         String fullUrl = this.baseUrl + (endpoint.startsWith("/") ? endpoint.substring(1) : endpoint);
 
         String jsonBody;
         try {
-            jsonBody = objectMapper.writeValueAsString(requestBody);
+            jsonBody = JsonUtils.toJson(requestBody);
         } catch (Exception e) {
             listener.onError(new IllegalArgumentException("Failed to serialize request body", e));
             return;
@@ -79,35 +76,20 @@ public class DifyClient {
                 }
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(body.byteStream(), StandardCharsets.UTF_8))) {
-
                     String line;
-                    String conversationId = null;
-
                     while ((line = reader.readLine()) != null) {
                         if (line.startsWith("data: ")) {
                             String data = line.substring(6).trim();
-
-                            if ("[DONE]".equals(data)) {
-                                listener.onComplete(conversationId);
-                                return;
-                            }
-
                             try {
-                                JsonNode event = objectMapper.readTree(data);
-
-                                // 提取内容（默认是 answer，但可自定义）
-                                String content = contentExtractor.apply(event);
-                                if (content != null && !content.isEmpty()) {
-                                    listener.onMessage(content);
+                                AgentResponse agentResponse = JsonUtils.fromJson(data, AgentResponse.class);
+                                if (agentResponse != null) {
+                                    if ("message_end".equals(agentResponse.getEvent())) {
+                                        listener.onMessage(data);
+                                        listener.onComplete(agentResponse.getConversationId());
+                                        return;
+                                    }
+                                    listener.onMessage(agentResponse.getAnswer() == null ? "" : agentResponse.getAnswer());
                                 }
-
-                                // 尝试提取 conversation_id（通用字段）
-                                if (conversationId == null && event.has("conversation_id")) {
-                                    conversationId = event.get("conversation_id").asText();
-                                }
-                                // 兼容 workflow 等场景：可能叫 task_id 或没有
-                                // 可扩展：通过 listener 回调整个 event
-
                             } catch (Exception e) {
                                 listener.onError(new RuntimeException("Parse SSE data error: " + data, e));
                             }
@@ -125,16 +107,6 @@ public class DifyClient {
                 .header("Content-Type", "application/json")
                 .post(RequestBody.create(MediaType.get("application/json; charset=utf-8"), jsonBody))
                 .build();
-    }
-
-    /**
-     * 便捷方法：使用默认 contentExtractor（提取 "answer" 字段）
-     */
-    public void stream(String apiKey, String endpoint, Object requestBody, DifyStreamListener listener) {
-        stream(apiKey, endpoint, requestBody, node -> {
-            JsonNode answer = node.get("answer");
-            return answer != null ? answer.asText() : "";
-        }, listener);
     }
 
 }
