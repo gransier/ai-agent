@@ -20,7 +20,7 @@ public class DifyClient {
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper = JsonUtils.getObjectMapper();
     @Getter
-    private final String baseUrl = "http://192.168.2.207/";
+    private final String baseUrl = "http://localhost/";
 
     /**
      * 构造函数：允许自定义 OkHttp 客户端（用于超时、拦截器等）

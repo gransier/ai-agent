@@ -5,7 +5,7 @@ import cn.gransier.domain.query.AgentQuery;
 import cn.gransier.domain.query.ChatCompleteQuery;
 import cn.gransier.domain.query.ChatQuery;
 import cn.gransier.util.DifyClient;
-import com.cx.aiot.common.core.web.domain.ApiResult;
+//import com.cx.aiot.common.core.web.domain.ApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.SneakyThrows;
 import org.springframework.http.MediaType;
@@ -21,15 +21,15 @@ public class ChatController {
     @Resource
     private DifyClient difyClient;
 
-        /**
-     * 获取聊天列表
-     */
-    @ApiOperation(value = "获取聊天列表")
-    @GetMapping("/list")
-    public ApiResult<?> list(@RequestBody ChatQuery chatQuery) {
-
-        return ApiResult.success();
-    }
+//        /**
+//     * 获取聊天列表
+//     */
+//    @ApiOperation(value = "获取聊天列表")
+//    @GetMapping("/list")
+//    public ApiResult<?> list(@RequestBody ChatQuery chatQuery) {
+//
+//        return ApiResult.success();
+//    }
 
     /**
      * 聊天接口
@@ -42,7 +42,7 @@ public class ChatController {
         AgentQuery agentQuery = new AgentQuery(query.getContent(), "user-123", query.getChatId(), query.isStream());
 
         return Flux.create(sink -> difyClient.stream(
-                "app-kn4j9PtM1SZLC5K7jL148MUm",
+                "app-gItXxmtOzXp7S6TdJb7TNcdF",
                 "/v1/chat-messages",
                 agentQuery,
                 DefaultDifyStreamListener.newInstance(sink)

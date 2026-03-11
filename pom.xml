@@ -36,11 +36,11 @@
       <version>${swagger.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.cx.aiot</groupId>
-      <artifactId>aiot-common-core</artifactId>
-      <version>${aiot.version}</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>com.cx.aiot</groupId>-->
+<!--      <artifactId>aiot-common-core</artifactId>-->
+<!--      <version>${aiot.version}</version>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
