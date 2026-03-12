@@ -1,7 +1,9 @@
 package cn.gransier.config;
 
+import cn.gransier.annotation.AgentService;
 import cn.gransier.annotation.AgentServiceScan;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@Slf4j
 public class AgentServiceScannerRegistrar implements ImportBeanDefinitionRegistrar {
 
     @Override
@@ -49,11 +52,12 @@ public class AgentServiceScannerRegistrar implements ImportBeanDefinitionRegistr
                 } else if (file.getName().endsWith(".class")) {
                     try {
                         Class<?> clazz = Class.forName(basePackage + "." + file.getName().replace(".class", ""));
-                        if (clazz.isInterface()) {
+                        AgentService annotation = clazz.getAnnotation(AgentService.class);
+                        if (clazz.isInterface() && annotation != null) {
                             classes.add(clazz);
                         }
                     } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
+                        log.error("Class not found: {}", e.getMessage());
                     }
                 }
             }

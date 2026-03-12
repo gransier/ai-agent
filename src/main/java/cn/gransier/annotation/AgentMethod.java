@@ -1,11 +1,16 @@
 package cn.gransier.annotation;
 
-import java.lang.annotation.*;
+import cn.gransier.enums.AgentMethods;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface AgentMethod {
     String apiKey();
     String endpoint();
-    String responseKey() default "answer";
+    AgentMethods method();
 }

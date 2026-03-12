@@ -13,11 +13,10 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring-boot.version>2.6.13</spring-boot.version>
+    <spring-boot.version>2.7.15</spring-boot.version>
     <lombok.version>1.18.28</lombok.version>
     <swagger.version>1.5.21</swagger.version>
     <okhttp.version>3.14.9</okhttp.version>
-    <forest.version>1.5.30</forest.version>
     <reactor.version>3.4.24</reactor.version>
     <aiot.version>1.0.1-SNAPSHOT</aiot.version>
 
@@ -36,23 +35,13 @@
       <version>${swagger.version}</version>
     </dependency>
 
-<!--    <dependency>-->
-<!--      <groupId>com.cx.aiot</groupId>-->
-<!--      <artifactId>aiot-common-core</artifactId>-->
-<!--      <version>${aiot.version}</version>-->
-<!--    </dependency>-->
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
       <version>${spring-boot.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.dtflys.forest</groupId>
-      <artifactId>forest-spring-boot-starter</artifactId>
-      <version>${forest.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
@@ -71,5 +60,12 @@
       <version>${spring-boot.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+
+
   </dependencies>
 </project>

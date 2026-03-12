@@ -1,16 +1,16 @@
-package cn.gransier.common;
+package cn.gransier.listener;
 
 import reactor.core.publisher.FluxSink;
 
-public class DefaultDifyStreamListener implements DifyStreamListener {
+public class FluxDifyStreamListener implements DifyStreamListener {
 
     private final FluxSink<String> sink;
 
-    private DefaultDifyStreamListener(FluxSink<String> sink) {
+    private FluxDifyStreamListener(FluxSink<String> sink) {
         this.sink = sink;
     }
     public static DifyStreamListener newInstance(FluxSink<String> sink) {
-        return new DefaultDifyStreamListener(sink);
+        return new FluxDifyStreamListener(sink);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package cn.gransier.common;
+package cn.gransier.listener;
 
 public interface DifyStreamListener {
 

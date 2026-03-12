@@ -2,9 +2,8 @@ package cn.gransier.config;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.annotation.AgentParam;
-import cn.gransier.common.DefaultDifyStreamListener;
+import cn.gransier.listener.FluxDifyStreamListener;
 import cn.gransier.util.DifyClient;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -24,6 +23,7 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     private Class<?> mapperClass;
     private BeanFactory beanFactory;
 
+    @SuppressWarnings("unused")
     public void setMapperClass(Class<?> mapperClass) {
         this.mapperClass = mapperClass;
     }
@@ -52,12 +52,29 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        AgentMethod annotation = method.getAnnotation(AgentMethod.class);
-        if (annotation != null) {
-            return handleAgentMethod(method, args, annotation);
+    public Object invoke(Object proxy, Method method, Object[] args) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        if (Object.class.equals(declaringClass)) {
+            switch (method.getName()) {
+                case "equals":
+                    return proxy == args[0];
+                case "hashCode":
+                    return System.identityHashCode(proxy);
+                case "toString":
+                    return "AgentServiceProxy@" + Integer.toHexString(System.identityHashCode(proxy));
+                default:
+                    break;
+            }
         }
-        throw new RuntimeException("代理方法必须使用@AgentMethod注解");
+
+        AgentMethod annotation = method.getAnnotation(AgentMethod.class);
+        if (method.getReturnType() == Flux.class) {
+            if (annotation != null) {
+                return handleAgentFlux(method, args, annotation);
+            }
+            throw new RuntimeException("代理方法必须使用@AgentMethod注解");
+        }
+        return handleHttp(method, args, annotation);
     }
 
     private Object buildRequestBody(Method method, Object[] args) {
@@ -74,7 +91,7 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
         for (int i = 0; i < parameters.length; i++) {
             AgentParam paramAnnotation = parameters[i].getAnnotation(AgentParam.class);
             String paramName = paramAnnotation != null ? paramAnnotation.value() : parameters[i].getName();
-            body.put(paramName, args[i]);
+            body.put(paramName.trim(), args[i]);
         }
         return body;
     }
@@ -85,15 +102,20 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     }
 
     @SuppressWarnings("all")
-    private Object handleAgentMethod(Method method, Object[] args, AgentMethod annotation) {
+    private Object handleAgentFlux(Method method, Object[] args, AgentMethod annotation) {
         DifyClient difyClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
 
         return Flux.<String>create(sink -> difyClient.stream(
-                annotation.apiKey(),
-                annotation.endpoint(),
+                annotation,
                 requestBody,
-                DefaultDifyStreamListener.newInstance(sink)
+                FluxDifyStreamListener.newInstance(sink)
         ));
+    }
+
+    private Object handleHttp(Method method, Object[] args, AgentMethod annotation) {
+        DifyClient difyClient = getDifyClient();
+        Object requestBody = buildRequestBody(method, args);
+        return difyClient.http(annotation, requestBody, method.getReturnType());
     }
 }
