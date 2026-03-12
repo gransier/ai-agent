@@ -1,5 +1,6 @@
 package cn.gransier.controller;
 
+import cn.gransier.domain.query.ChatCompleteQuery;
 import cn.gransier.domain.query.DifyChatQuery;
 import cn.gransier.domain.query.DifyConversationsQuery;
 import cn.gransier.domain.query.DifyMessagesQuery;
@@ -17,7 +18,7 @@ import javax.annotation.Resource;
 @Api(tags = "DifyAgent对话接口-mini")
 @Slf4j
 @RestController
-@RequestMapping("/ai-cloud/chat")
+@RequestMapping("/mini/ai-cloud/chat")
 public class DifyAgentController {
 
     @Resource
@@ -27,7 +28,8 @@ public class DifyAgentController {
     @PostMapping(value = "/completions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseBody
     @SneakyThrows
-    public Flux<String> completions(DifyChatQuery difyQuery) {
+    public Flux<String> completions(ChatCompleteQuery query) {
+        DifyChatQuery difyQuery = new DifyChatQuery(query.getContent(), query.getUser(), query.getConversation_id(), query.isStream());
 
         return difyAgentService.completions(difyQuery);
     }
