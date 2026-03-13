@@ -116,20 +116,11 @@ public class AgentClient {
                         new InputStreamReader(body.byteStream(), StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        if (line.startsWith("data: ")) {
-                            String data = line.substring(6).trim();
-                            try {
-                                T entity = JsonUtils.parseJson(data, listener.getType());
-                                registry.dispatch(entity, listener);
-                            } catch (Exception e) {
-                                log.error("接收SSE异常:{}", e.getMessage());
-                                listener.onError(new RuntimeException(data, e));
-                            }
-                        } else {
-                            if (StringUtils.hasText(line) && !"event: ping".equals(line)) {
-                                log.warn(line);
-                                listener.onError(new RuntimeException(line));
-                            }
+                        try {
+                            registry.dispatch(line, listener);
+                        } catch (Exception e) {
+                            log.error("接收SSE异常:{}", e.getMessage());
+                            listener.onError(new RuntimeException(line, e));
                         }
                     }
                 }

@@ -30,4 +30,9 @@ public class DifyChatResponse {
     private List<Object> message_files;
     
     private String answer;
+
+    // 异常信息
+    private String code;
+    private String message;
+    private int status;
 }

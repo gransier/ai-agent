@@ -8,16 +8,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class JsonUtils {
+
+@Component
+public class JsonUtils implements ApplicationContextAware {
 
     @Getter
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper;
 
-    static {
+    @Override
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        JsonUtils.objectMapper = context.getBean(ObjectMapper.class);
+
         // Configure the ObjectMapper to handle Java 8 date and time types.
         objectMapper.registerModule(new JavaTimeModule());
         // Disable the feature that fails on unknown properties when deserializing.
@@ -29,6 +38,10 @@ public class JsonUtils {
     }
 
     public static String toJson(Object obj) {
+        if (objectMapper == null) {
+            // 防止在 Spring 完全启动前被静态调用
+            throw new IllegalStateException("JsonUtils not initialized yet. Is Spring context ready?");
+        }
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
@@ -37,6 +50,10 @@ public class JsonUtils {
     }
 
     public static <T> T parseJson(String jsonStr, Class<T> clazz) {
+        if (objectMapper == null) {
+            // 防止在 Spring 完全启动前被静态调用
+            throw new IllegalStateException("JsonUtils not initialized yet. Is Spring context ready?");
+        }
         try {
             return objectMapper.readValue(jsonStr, clazz);
         } catch (JsonProcessingException e) {
@@ -45,6 +62,10 @@ public class JsonUtils {
     }
 
     public static Map<String, Object> parseMap(Object requestBody) {
+        if (objectMapper == null) {
+            // 防止在 Spring 完全启动前被静态调用
+            throw new IllegalStateException("JsonUtils not initialized yet. Is Spring context ready?");
+        }
         if (requestBody == null) {
             return Map.of();
         }

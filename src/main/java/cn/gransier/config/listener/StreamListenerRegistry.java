@@ -4,22 +4,21 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 @Component
 public class StreamListenerRegistry {
 
-    private final Map<Class<?>, BiConsumer<?, ?>> registry = new HashMap<>();
+    private final Map<Class<?>, StreamListenerTemplate<?>> registry = new HashMap<>();
 
-    public <T> void register(Class<T> type, BiConsumer<T, StreamListener<T>> consumer) {
-        registry.put(type, consumer);
+    public <T> void register(Class<T> type, StreamListenerTemplate<T> template) {
+        registry.put(type, template);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> void dispatch(T entity, StreamListener<T> listener) {
-        BiConsumer<?, ?> consumer = registry.get(listener.getType());
-        if (consumer != null) {
-            ((BiConsumer<T, StreamListener<T>>) consumer).accept(entity, listener);
+    public <T> void dispatch(String line, StreamListener<T> listener) {
+        @SuppressWarnings("unchecked")
+        StreamListenerTemplate<T> template = (StreamListenerTemplate<T>) registry.get(listener.getType());
+        if (template != null) {
+            template.process(line, listener);
         }
     }
 }
