@@ -10,7 +10,7 @@ import cn.gransier.domain.response.DifyChatResponse;
 import cn.gransier.enums.AgentMethods;
 import reactor.core.publisher.Flux;
 
-@AgentService
+@AgentService("http://localhost/v1/")
 public interface DifyAgentService {
 
     @AgentMethod(endpoint = "/chat-messages", method = AgentMethods.POST)

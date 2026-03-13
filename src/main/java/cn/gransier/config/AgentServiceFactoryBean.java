@@ -2,7 +2,7 @@ package cn.gransier.config;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.annotation.AgentParam;
-import cn.gransier.context.ApiKeyContext;
+import cn.gransier.context.AgentContext;
 import cn.gransier.listener.FluxDifyStreamListener;
 import cn.gransier.util.AgentClient;
 import cn.gransier.util.TypeUtils;
@@ -107,10 +107,12 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     private Object handleAgentFlux(Method method, Object[] args, AgentMethod annotation) {
         AgentClient agentClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
-        String apiKey = ApiKeyContext.getApiKey();
+        String apiKey = AgentContext.getApiKey();
+        String baseUrl = AgentContext.getBaseUrl();
         return Flux.create(sink -> agentClient.stream(
                 annotation,
                 apiKey,
+                baseUrl,
                 requestBody,
                 FluxDifyStreamListener.newInstance(sink, TypeUtils.getGenericReturnType(method, 0))
         ));
@@ -119,8 +121,9 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     private Object handleHttp(Method method, Object[] args, AgentMethod annotation) {
         AgentClient agentClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
-        String apiKey = ApiKeyContext.getApiKey();
+        String apiKey = AgentContext.getApiKey();
+        String baseUrl = AgentContext.getBaseUrl();
 
-        return agentClient.http(annotation, apiKey, requestBody, method.getReturnType());
+        return agentClient.http(annotation, apiKey, baseUrl, requestBody, method.getReturnType());
     }
 }

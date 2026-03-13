@@ -1,7 +1,7 @@
 package cn.gransier;
 
 import cn.gransier.annotation.AgentMethod;
-import cn.gransier.context.ApiKeyContext;
+import cn.gransier.context.AgentContext;
 import cn.gransier.domain.query.DifyChatQuery;
 import cn.gransier.enums.AgentMethods;
 import cn.gransier.listener.DifyStreamListener;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Slf4j
 public class AgentClientTest {
@@ -32,17 +31,12 @@ public class AgentClientTest {
         DifyChatQuery difyChatQuery = new DifyChatQuery("hello", "user-123", "");
 
         // Set API key in ThreadLocal context (simulating interceptor behavior)
-        ApiKeyContext.setApiKey("test-api-key-from-header");
+        AgentContext.setApiKey("test-api-key-from-header");
 
         // 测试流式调用
-        difyClient.stream(agentMethod, apiKey, difyChatQuery, new DifyStreamListener<String>() {
+        difyClient.stream(agentMethod, apiKey, "", difyChatQuery, new DifyStreamListener<String>() {
             @Override
             public Class<String> getType() {
-                return null;
-            }
-
-            @Override
-            public String getBaseUrl() {
                 return null;
             }
 
@@ -50,7 +44,6 @@ public class AgentClientTest {
             public Consumer<String> consumer() {
                 return null;
             }
-
 
             @Override
             public void onMessage(String message) {
@@ -69,7 +62,7 @@ public class AgentClientTest {
         });
 
         // Clean up ThreadLocal
-        ApiKeyContext.clear();
+        AgentContext.clear();
     }
 
     @Test
@@ -84,13 +77,13 @@ public class AgentClientTest {
         );
 
         // Set API key in ThreadLocal context (simulating interceptor behavior)
-        ApiKeyContext.setApiKey("test-api-key-from-header");
+        AgentContext.setApiKey("test-api-key-from-header");
 
-        String object = difyClient.http(agentMethod, apiKey, map, String.class);
+        String object = difyClient.http(agentMethod, apiKey, "", map, String.class);
         System.out.println(object);
 
         // Clean up ThreadLocal
-        ApiKeyContext.clear();
+        AgentContext.clear();
     }
 
     /**

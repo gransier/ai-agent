@@ -30,7 +30,6 @@ public class FluxDifyStreamListener<T> implements DifyStreamListener<T> {
             // todo 维护一个注册表(Map<Class,Consumer>)，用以注册不同的类
             if (entity instanceof DifyChatResponse difyChatResponse){
                 if ("message_end".equals(difyChatResponse.getEvent())) {
-                    onMessage(entity);
                     onComplete(entity);
                     return;
                 }
@@ -51,6 +50,7 @@ public class FluxDifyStreamListener<T> implements DifyStreamListener<T> {
 
     @Override
     public void onComplete(T complete) {
+        onMessage(complete);
         sink.complete();
     }
 

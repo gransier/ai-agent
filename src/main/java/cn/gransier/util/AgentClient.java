@@ -51,8 +51,8 @@ public class AgentClient {
      * @param requestBody 请求体
      * @return 响应结果
      */
-    public <T> T http(AgentMethod annotation, String apiKey, Object requestBody, Class<T> responseType) {
-        Request request = getRequest(annotation, requestBody, apiKey);
+    public <T> T http(AgentMethod annotation, String apiKey, String baseUrl, Object requestBody, Class<T> responseType) {
+        Request request = getRequest(annotation, requestBody, apiKey, baseUrl);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 String errorMsg = response.body() != null ? response.body().string() : "Unknown error";
@@ -88,9 +88,10 @@ public class AgentClient {
     public <T> void stream(
             AgentMethod annotation,
             String apiKey,
+            String baseUrl,
             Object requestBody,
             DifyStreamListener<T> listener) {
-        Request request = getRequest(annotation, requestBody, apiKey);
+        Request request = getRequest(annotation, requestBody, apiKey, baseUrl);
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -135,9 +136,10 @@ public class AgentClient {
      * @param agentMethod 请求配置注解
      * @param requestBody 请求体
      * @param apiKey      API key (passed from caller to avoid ThreadLocal issues with async)
+     * @param baseUrl
      * @return 请求包装
      */
-    private Request getRequest(AgentMethod agentMethod, Object requestBody, String apiKey) {
+    private Request getRequest(AgentMethod agentMethod, Object requestBody, String apiKey, String baseUrl) {
         AgentMethods method = agentMethod.method();
         String endpoint = agentMethod.endpoint();
 
@@ -145,7 +147,7 @@ public class AgentClient {
             Map<String, Object> map = JsonUtils.parseMap(requestBody);
             endpoint = PathTemplateRenderer.render(endpoint, map);
         }
-        String fullUrl = this.baseUrl + (endpoint.startsWith("/") ? endpoint.substring(1) : endpoint);
+        String fullUrl = buildFullUrl(baseUrl, endpoint);
         Request.Builder requestBuilder = new Request.Builder()
                 .url(fullUrl)
                 .header("Authorization", "Bearer " + apiKey)
@@ -180,6 +182,14 @@ public class AgentClient {
         }
 
         return requestBuilder.build();
+    }
+
+    private String buildFullUrl(String baseUrl, String endpoint) {
+        String suffix = endpoint.startsWith("/") ? endpoint.substring(1) : endpoint;
+        if (StringUtils.hasText(baseUrl)) {
+            return baseUrl + suffix;
+        }
+        return this.baseUrl + suffix;
     }
 
     /**

@@ -1,16 +1,13 @@
 package cn.gransier;
 
 import cn.gransier.annotation.AgentMethod;
-import cn.gransier.context.ApiKeyContext;
-import cn.gransier.domain.query.DifyChatQuery;
+import cn.gransier.context.AgentContext;
 import cn.gransier.enums.AgentMethods;
-import cn.gransier.listener.DifyStreamListener;
 import cn.gransier.util.AgentClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
-import java.util.Map;
 
 @Slf4j
 public class ApiKeyAspectTest {
@@ -18,11 +15,11 @@ public class ApiKeyAspectTest {
     @Test
     public void testApiKeyExtraction() {
         // Test that ApiKeyContext works correctly
-        ApiKeyContext.setApiKey("test-key");
-        String key = ApiKeyContext.getApiKey();
+        AgentContext.setApiKey("test-key");
+        String key = AgentContext.getApiKey();
         assert key.equals("test-key") : "Expected test-key, got " + key;
-        ApiKeyContext.clear();
-        assert ApiKeyContext.getApiKey() == null : "Expected null after clear";
+        AgentContext.clear();
+        assert AgentContext.getApiKey() == null : "Expected null after clear";
     }
 
     @Test
@@ -42,12 +39,12 @@ public class ApiKeyAspectTest {
         );
 
         // Test with context set
-        ApiKeyContext.setApiKey("context-key");
+        AgentContext.setApiKey("context-key");
         // We can't easily test the actual HTTP call without mocking, but we can verify
         // that the context is accessible
-        String contextKey = ApiKeyContext.getApiKey();
+        String contextKey = AgentContext.getApiKey();
         assert contextKey.equals("context-key") : "Expected context-key, got " + contextKey;
         
-        ApiKeyContext.clear();
+        AgentContext.clear();
     }
 }
