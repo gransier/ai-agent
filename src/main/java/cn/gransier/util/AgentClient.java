@@ -2,7 +2,6 @@ package cn.gransier.util;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.config.AgentProperties;
-import cn.gransier.domain.response.DifyChatResponse;
 import cn.gransier.enums.AgentMethods;
 import cn.gransier.listener.DifyStreamListener;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -86,11 +85,11 @@ public class AgentClient {
      * @param requestBody 请求体（会自动转为 JSON）
      * @param listener    流式回调监听器
      */
-    public void stream(
+    public <T> void stream(
             AgentMethod annotation,
             String apiKey,
             Object requestBody,
-            DifyStreamListener listener) {
+            DifyStreamListener<T> listener) {
         Request request = getRequest(annotation, requestBody, apiKey);
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -112,19 +111,8 @@ public class AgentClient {
                         if (line.startsWith("data: ")) {
                             String data = line.substring(6).trim();
                             try {
-                                DifyChatResponse difyChatResponse = JsonUtils.parseJson(data, DifyChatResponse.class);
-                                if (difyChatResponse != null) {
-                                    if ("message_end".equals(difyChatResponse.getEvent())) {
-                                        listener.onMessage(data);
-                                        listener.onComplete(difyChatResponse.getConversation_id());
-                                        return;
-                                    }
-                                    String answer = difyChatResponse.getAnswer() == null ? "" : difyChatResponse.getAnswer();
-                                    String escapedAnswer = answer.replace("\n", "<br/>")
-                                            .replace(" ", "&nbsp;");
-                                    System.out.print(answer);
-                                    listener.onMessage(escapedAnswer);
-                                }
+                                T entity = JsonUtils.parseJson(data, listener.getType());
+                                listener.consumer().accept(entity);
                             } catch (Exception e) {
                                 log.error("接收SSE异常:{}", e.getMessage());
                                 listener.onError(new RuntimeException(data, e));

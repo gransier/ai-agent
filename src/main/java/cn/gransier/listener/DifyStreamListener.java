@@ -1,10 +1,16 @@
 package cn.gransier.listener;
 
-public interface DifyStreamListener {
+import java.util.function.Consumer;
 
-    void onMessage(String answer);
+public interface DifyStreamListener<T> {
 
-    void onComplete(String conversationId);
+    Class<T> getType();
+
+    Consumer<T> consumer();
+
+    void onMessage(T message);
+
+    void onComplete(T complete);
 
     void onError(Throwable error);
 }

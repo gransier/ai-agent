@@ -5,6 +5,7 @@ import cn.gransier.annotation.AgentParam;
 import cn.gransier.context.ApiKeyContext;
 import cn.gransier.listener.FluxDifyStreamListener;
 import cn.gransier.util.AgentClient;
+import cn.gransier.util.TypeUtils;
 import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -12,10 +13,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import reactor.core.publisher.Flux;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,14 +55,17 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
         Class<?> declaringClass = method.getDeclaringClass();
         if (Object.class.equals(declaringClass)) {
             switch (method.getName()) {
-                case "equals":
+                case "equals" -> {
                     return proxy == args[0];
-                case "hashCode":
+                }
+                case "hashCode" -> {
                     return System.identityHashCode(proxy);
-                case "toString":
+                }
+                case "toString" -> {
                     return "AgentServiceProxy@" + Integer.toHexString(System.identityHashCode(proxy));
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
         }
 
@@ -107,12 +108,11 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
         AgentClient agentClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
         String apiKey = ApiKeyContext.getApiKey();
-
-        return Flux.<String>create(sink -> agentClient.stream(
+        return Flux.create(sink -> agentClient.stream(
                 annotation,
                 apiKey,
                 requestBody,
-                FluxDifyStreamListener.newInstance(sink)
+                FluxDifyStreamListener.newInstance(sink, TypeUtils.getGenericReturnType(method, 0))
         ));
     }
 

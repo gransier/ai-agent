@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Slf4j
 public class AgentClientTest {
@@ -33,7 +35,23 @@ public class AgentClientTest {
         ApiKeyContext.setApiKey("test-api-key-from-header");
 
         // 测试流式调用
-        difyClient.stream(agentMethod, apiKey, difyChatQuery, new DifyStreamListener() {
+        difyClient.stream(agentMethod, apiKey, difyChatQuery, new DifyStreamListener<String>() {
+            @Override
+            public Class<String> getType() {
+                return null;
+            }
+
+            @Override
+            public String getBaseUrl() {
+                return null;
+            }
+
+            @Override
+            public Consumer<String> consumer() {
+                return null;
+            }
+
+
             @Override
             public void onMessage(String message) {
                 System.out.print(message);

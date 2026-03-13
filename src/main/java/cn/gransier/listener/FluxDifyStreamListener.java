@@ -1,25 +1,56 @@
 package cn.gransier.listener;
 
+import cn.gransier.domain.response.DifyChatResponse;
 import reactor.core.publisher.FluxSink;
 
-public class FluxDifyStreamListener implements DifyStreamListener {
+import java.util.function.Consumer;
 
-    private final FluxSink<String> sink;
+public class FluxDifyStreamListener<T> implements DifyStreamListener<T> {
 
-    private FluxDifyStreamListener(FluxSink<String> sink) {
+    private final FluxSink<T> sink;
+    private final Class<T> type;
+
+    private FluxDifyStreamListener(FluxSink<T> sink, Class<T> type) {
         this.sink = sink;
+        this.type = type;
     }
-    public static DifyStreamListener newInstance(FluxSink<String> sink) {
-        return new FluxDifyStreamListener(sink);
+
+    public static <T> DifyStreamListener<T> newInstance(FluxSink<T> sink, Class<T> type) {
+        return new FluxDifyStreamListener<>(sink, type);
     }
 
     @Override
-    public void onMessage(String data) {
-        sink.next(data);
+    public Class<T> getType() {
+        return type;
     }
 
     @Override
-    public void onComplete(String conversationId) {
+    public Consumer<T> consumer() {
+        return (entity) -> {
+            // todo 维护一个注册表(Map<Class,Consumer>)，用以注册不同的类
+            if (entity instanceof DifyChatResponse difyChatResponse){
+                if ("message_end".equals(difyChatResponse.getEvent())) {
+                    onMessage(entity);
+                    onComplete(entity);
+                    return;
+                }
+                String answer = difyChatResponse.getAnswer() == null ? "" : difyChatResponse.getAnswer();
+                String escapedAnswer = answer.replace("\n", "<br/>")
+                        .replace(" ", "&nbsp;");
+                System.out.print(answer);
+                difyChatResponse.setAnswer(escapedAnswer);
+                onMessage(entity);
+            }
+        };
+    }
+
+    @Override
+    public void onMessage(T message) {
+        sink.next(message);
+    }
+
+    @Override
+    public void onComplete(T complete) {
         sink.complete();
     }
 

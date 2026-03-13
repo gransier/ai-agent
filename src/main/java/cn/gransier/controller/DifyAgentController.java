@@ -4,6 +4,7 @@ import cn.gransier.domain.query.ChatCompleteQuery;
 import cn.gransier.domain.query.DifyChatQuery;
 import cn.gransier.domain.query.DifyConversationsQuery;
 import cn.gransier.domain.query.DifyMessagesQuery;
+import cn.gransier.domain.response.DifyChatResponse;
 import cn.gransier.service.DifyAgentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +29,7 @@ public class DifyAgentController {
     @PostMapping(value = "/completions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseBody
     @SneakyThrows
-    public Flux<String> completions(@RequestBody ChatCompleteQuery query) {
+    public Flux<DifyChatResponse> completions(@RequestBody ChatCompleteQuery query) {
         DifyChatQuery difyQuery = new DifyChatQuery(query.getContent(), query.getUser(), query.getConversation_id(), query.isStream());
 
         return difyAgentService.completions(difyQuery);
