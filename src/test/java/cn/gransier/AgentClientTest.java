@@ -14,6 +14,8 @@ import java.util.Map;
 
 @Slf4j
 public class AgentClientTest {
+    private String apiKey = "ApiKeyContext.getApiKey()";
+
     @Test
     public void testStream() {
         AgentClient difyClient = new AgentClient(null);
@@ -31,7 +33,7 @@ public class AgentClientTest {
         ApiKeyContext.setApiKey("test-api-key-from-header");
 
         // 测试流式调用
-        difyClient.stream(agentMethod, difyChatQuery, new DifyStreamListener() {
+        difyClient.stream(agentMethod, apiKey, difyChatQuery, new DifyStreamListener() {
             @Override
             public void onMessage(String message) {
                 System.out.print(message);
@@ -47,7 +49,7 @@ public class AgentClientTest {
                 System.err.println("发生错误：" + error.getMessage());
             }
         });
-        
+
         // Clean up ThreadLocal
         ApiKeyContext.clear();
     }
@@ -62,13 +64,13 @@ public class AgentClientTest {
         Map<Object, Object> map = Map.of(
                 "user", "user-123"
         );
-        
+
         // Set API key in ThreadLocal context (simulating interceptor behavior)
         ApiKeyContext.setApiKey("test-api-key-from-header");
-        
-        String object = difyClient.http(agentMethod, map, String.class);
+
+        String object = difyClient.http(agentMethod, apiKey, map, String.class);
         System.out.println(object);
-        
+
         // Clean up ThreadLocal
         ApiKeyContext.clear();
     }
@@ -81,7 +83,6 @@ public class AgentClientTest {
                 AgentClientTest.class.getClassLoader(),
                 new Class<?>[]{AgentMethod.class},
                 (proxy, method1, args) -> switch (method1.getName()) {
-                    case "apiKey" -> "app-kn4j9PtM1SZLC5K7jL148MUm";
                     case "endpoint" -> endpoint;
                     case "method" -> method;
                     case "annotationType" -> AgentMethod.class;

@@ -34,7 +34,6 @@ public class ApiKeyAspectTest {
                 ApiKeyAspectTest.class.getClassLoader(),
                 new Class<?>[]{AgentMethod.class},
                 (proxy, method1, args) -> switch (method1.getName()) {
-                    case "apiKey" -> "fallback-key";
                     case "endpoint" -> "/test";
                     case "method" -> AgentMethods.POST;
                     case "annotationType" -> AgentMethod.class;

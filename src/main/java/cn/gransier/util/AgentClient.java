@@ -2,7 +2,6 @@ package cn.gransier.util;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.config.AgentProperties;
-import cn.gransier.context.ApiKeyContext;
 import cn.gransier.domain.response.DifyChatResponse;
 import cn.gransier.enums.AgentMethods;
 import cn.gransier.listener.DifyStreamListener;
@@ -48,12 +47,13 @@ public class AgentClient {
     /**
      * 通用 HTTP 调用方法（同步）
      *
-     * @param annotation  注解配置（包含 apiKey、endpoint、method）
+     * @param annotation  注解配置（包含 endpoint、method）
+     * @param apiKey      token
      * @param requestBody 请求体
      * @return 响应结果
      */
-    public <T> T http(AgentMethod annotation, Object requestBody, Class<T> responseType) {
-        Request request = getRequest(annotation, requestBody);
+    public <T> T http(AgentMethod annotation, String apiKey, Object requestBody, Class<T> responseType) {
+        Request request = getRequest(annotation, requestBody, apiKey);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 String errorMsg = response.body() != null ? response.body().string() : "Unknown error";
@@ -81,17 +81,17 @@ public class AgentClient {
     /**
      * 通用流式调用方法
      *
-     * @param annotation  apiKey           Dify API Key
-     *                    endpoint         接口路径，如 "v1/chat-messages"
+     * @param annotation  注解配置（包含 endpoint、method）
+     * @param apiKey      token
      * @param requestBody 请求体（会自动转为 JSON）
      * @param listener    流式回调监听器
      */
     public void stream(
             AgentMethod annotation,
+            String apiKey,
             Object requestBody,
             DifyStreamListener listener) {
-
-        Request request = getRequest(annotation, requestBody);
+        Request request = getRequest(annotation, requestBody, apiKey);
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -146,15 +146,10 @@ public class AgentClient {
      *
      * @param agentMethod 请求配置注解
      * @param requestBody 请求体
+     * @param apiKey      API key (passed from caller to avoid ThreadLocal issues with async)
      * @return 请求包装
      */
-    private Request getRequest(AgentMethod agentMethod, Object requestBody) {
-        // Get API key from ThreadLocal context, fallback to annotation if not present
-        String apiKey = ApiKeyContext.getApiKey();
-        if (!StringUtils.hasText(apiKey)) {
-            throw new RuntimeException("请求头缺失apiKey...");
-        }
-        
+    private Request getRequest(AgentMethod agentMethod, Object requestBody, String apiKey) {
         AgentMethods method = agentMethod.method();
         String endpoint = agentMethod.endpoint();
 

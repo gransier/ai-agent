@@ -2,6 +2,7 @@ package cn.gransier.config;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.annotation.AgentParam;
+import cn.gransier.context.ApiKeyContext;
 import cn.gransier.listener.FluxDifyStreamListener;
 import cn.gransier.util.AgentClient;
 import lombok.NonNull;
@@ -105,9 +106,11 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     private Object handleAgentFlux(Method method, Object[] args, AgentMethod annotation) {
         AgentClient agentClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
+        String apiKey = ApiKeyContext.getApiKey();
 
         return Flux.<String>create(sink -> agentClient.stream(
                 annotation,
+                apiKey,
                 requestBody,
                 FluxDifyStreamListener.newInstance(sink)
         ));
@@ -116,6 +119,8 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     private Object handleHttp(Method method, Object[] args, AgentMethod annotation) {
         AgentClient agentClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
-        return agentClient.http(annotation, requestBody, method.getReturnType());
+        String apiKey = ApiKeyContext.getApiKey();
+
+        return agentClient.http(annotation, apiKey, requestBody, method.getReturnType());
     }
 }

@@ -1,5 +1,7 @@
 package cn.gransier.context;
 
+import org.springframework.util.StringUtils;
+
 /**
  * ThreadLocal holder for API key to enable transparent access
  */
@@ -11,7 +13,11 @@ public class ApiKeyContext {
     }
 
     public static String getApiKey() {
-        return API_KEY_HOLDER.get();
+        String apiKey = API_KEY_HOLDER.get();
+        if (!StringUtils.hasText(apiKey)) {
+            throw new RuntimeException("请求头缺失apiKey...");
+        }
+        return apiKey;
     }
 
     public static void clear() {
