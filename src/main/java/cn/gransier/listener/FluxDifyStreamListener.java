@@ -14,8 +14,8 @@ public class FluxDifyStreamListener implements DifyStreamListener {
     }
 
     @Override
-    public void onMessage(String answer) {
-        sink.next(answer);
+    public void onMessage(String data) {
+        sink.next(data);
     }
 
     @Override

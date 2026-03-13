@@ -24,8 +24,8 @@ public class JsonUtils {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // Pretty print JSON output.
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        // 自动忽略 null 字段
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        // 自动忽略 空值 字段
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     }
 
     public static String toJson(Object obj) {

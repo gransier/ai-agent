@@ -7,8 +7,10 @@ import cn.gransier.listener.DifyStreamListener;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,8 +19,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+@Slf4j
 @Component
-public class DifyClient {
+public class AgentClient {
 
     private final OkHttpClient httpClient;
 
@@ -27,14 +30,17 @@ public class DifyClient {
     /**
      * 构造函数：允许自定义 OkHttp 客户端（用于超时、拦截器等）
      */
-    public DifyClient() {
+    public AgentClient() {
         this(new OkHttpClient.Builder()
-                .callTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(5, java.util.concurrent.TimeUnit.MINUTES)
+                .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .callTimeout(10, java.util.concurrent.TimeUnit.MINUTES)
+                .retryOnConnectionFailure(true)
                 .build());
     }
 
-    public DifyClient(OkHttpClient httpClient) {
+    public AgentClient(OkHttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -114,11 +120,19 @@ public class DifyClient {
                                         return;
                                     }
                                     String answer = difyChatResponse.getAnswer() == null ? "" : difyChatResponse.getAnswer();
+                                    String escapedAnswer = answer.replace("\n", "<br/>")
+                                            .replace(" ", "&nbsp;");
                                     System.out.print(answer);
-                                    listener.onMessage(answer);
+                                    listener.onMessage(escapedAnswer);
                                 }
                             } catch (Exception e) {
-                                listener.onError(new RuntimeException("Parse SSE data error: " + data, e));
+                                log.error("接收SSE异常:{}", e.getMessage());
+                                listener.onError(new RuntimeException(data, e));
+                            }
+                        } else {
+                            if (StringUtils.hasText(line) && !"event: ping".equals(line)) {
+                                log.warn(line);
+                                listener.onError(new RuntimeException(line));
                             }
                         }
                     }

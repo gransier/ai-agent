@@ -3,7 +3,7 @@ package cn.gransier.config;
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.annotation.AgentParam;
 import cn.gransier.listener.FluxDifyStreamListener;
-import cn.gransier.util.DifyClient;
+import cn.gransier.util.AgentClient;
 import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -33,8 +33,8 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
         this.beanFactory = beanFactory;
     }
 
-    private DifyClient getDifyClient() {
-        return beanFactory.getBean(DifyClient.class);
+    private AgentClient getDifyClient() {
+        return beanFactory.getBean(AgentClient.class);
     }
 
     @Override
@@ -103,10 +103,10 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
 
     @SuppressWarnings("all")
     private Object handleAgentFlux(Method method, Object[] args, AgentMethod annotation) {
-        DifyClient difyClient = getDifyClient();
+        AgentClient agentClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
 
-        return Flux.<String>create(sink -> difyClient.stream(
+        return Flux.<String>create(sink -> agentClient.stream(
                 annotation,
                 requestBody,
                 FluxDifyStreamListener.newInstance(sink)
@@ -114,8 +114,8 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
     }
 
     private Object handleHttp(Method method, Object[] args, AgentMethod annotation) {
-        DifyClient difyClient = getDifyClient();
+        AgentClient agentClient = getDifyClient();
         Object requestBody = buildRequestBody(method, args);
-        return difyClient.http(annotation, requestBody, method.getReturnType());
+        return agentClient.http(annotation, requestBody, method.getReturnType());
     }
 }

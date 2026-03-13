@@ -1,5 +1,6 @@
 package cn.gransier.domain.query;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.util.Map;
 public class DifyChatQuery {
 
     @ApiModelProperty("允许传入 App 定义的各变量值。 inputs 参数包含了多组键值对（Key/Value pairs），每组的键对应一个特定变量，每组的值则是该变量的具体值。 默认 {}")
+    @JsonInclude
     private Map<String, Object> inputs = Map.of();
     @ApiModelProperty("用户输入/提问内容")
     private String query;

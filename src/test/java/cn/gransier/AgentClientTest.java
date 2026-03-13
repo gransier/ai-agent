@@ -1,11 +1,10 @@
 package cn.gransier;
 
-
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.domain.query.DifyChatQuery;
 import cn.gransier.enums.AgentMethods;
 import cn.gransier.listener.DifyStreamListener;
-import cn.gransier.util.DifyClient;
+import cn.gransier.util.AgentClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -13,10 +12,10 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 @Slf4j
-public class DifyClientTest {
+public class AgentClientTest {
     @Test
     public void testStream() {
-        DifyClient difyClient = new DifyClient();
+        AgentClient difyClient = new AgentClient();
 
         // 方式 1：使用动态代理创建注解实例
         AgentMethod agentMethod = createAgentMethod(
@@ -49,7 +48,7 @@ public class DifyClientTest {
 
     @Test
     public void testHttp() {
-        DifyClient difyClient = new DifyClient();
+        AgentClient difyClient = new AgentClient();
         AgentMethod agentMethod = createAgentMethod(
                 "/conversations",
                 AgentMethods.GET
@@ -66,7 +65,7 @@ public class DifyClientTest {
      */
     private static AgentMethod createAgentMethod(String endpoint, AgentMethods method) {
         return (AgentMethod) Proxy.newProxyInstance(
-                DifyClientTest.class.getClassLoader(),
+                AgentClientTest.class.getClassLoader(),
                 new Class<?>[]{AgentMethod.class},
                 (proxy, method1, args) -> switch (method1.getName()) {
                     case "apiKey" -> "app-kn4j9PtM1SZLC5K7jL148MUm";
