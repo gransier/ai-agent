@@ -4,18 +4,17 @@ import cn.gransier.annotation.AgentMethod;
 import cn.gransier.context.AgentContext;
 import cn.gransier.domain.query.DifyChatQuery;
 import cn.gransier.enums.AgentMethods;
-import cn.gransier.listener.DifyStreamListener;
+import cn.gransier.config.listener.StreamListener;
 import cn.gransier.util.AgentClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 import java.util.Map;
-import java.util.function.Consumer;
 
 @Slf4j
 public class AgentClientTest {
-    private String apiKey = "ApiKeyContext.getApiKey()";
+    private final String apiKey = "ApiKeyContext.getApiKey()";
 
     @Test
     public void testStream() {
@@ -34,14 +33,9 @@ public class AgentClientTest {
         AgentContext.setApiKey("test-api-key-from-header");
 
         // 测试流式调用
-        difyClient.stream(agentMethod, apiKey, "", difyChatQuery, new DifyStreamListener<String>() {
+        difyClient.stream(agentMethod, apiKey, "", difyChatQuery, new StreamListener<String>() {
             @Override
             public Class<String> getType() {
-                return null;
-            }
-
-            @Override
-            public Consumer<String> consumer() {
                 return null;
             }
 

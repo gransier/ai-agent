@@ -2,8 +2,9 @@ package cn.gransier.util;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.config.AgentProperties;
+import cn.gransier.config.listener.StreamListenerRegistry;
 import cn.gransier.enums.AgentMethods;
-import cn.gransier.listener.DifyStreamListener;
+import cn.gransier.config.listener.StreamListener;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
@@ -12,6 +13,7 @@ import okhttp3.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,6 +29,9 @@ public class AgentClient {
     private final OkHttpClient httpClient;
 
     private final String baseUrl;
+
+    @Resource
+    private StreamListenerRegistry registry;
 
     /**
      * 构造函数：允许自定义 OkHttp 客户端（用于超时、拦截器等）
@@ -48,6 +53,7 @@ public class AgentClient {
      *
      * @param annotation  注解配置（包含 endpoint、method）
      * @param apiKey      token
+     * @param baseUrl     基础请求路径
      * @param requestBody 请求体
      * @return 响应结果
      */
@@ -82,6 +88,7 @@ public class AgentClient {
      *
      * @param annotation  注解配置（包含 endpoint、method）
      * @param apiKey      token
+     * @param baseUrl     基础请求路径
      * @param requestBody 请求体（会自动转为 JSON）
      * @param listener    流式回调监听器
      */
@@ -90,7 +97,7 @@ public class AgentClient {
             String apiKey,
             String baseUrl,
             Object requestBody,
-            DifyStreamListener<T> listener) {
+            StreamListener<T> listener) {
         Request request = getRequest(annotation, requestBody, apiKey, baseUrl);
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -113,7 +120,7 @@ public class AgentClient {
                             String data = line.substring(6).trim();
                             try {
                                 T entity = JsonUtils.parseJson(data, listener.getType());
-                                listener.consumer().accept(entity);
+                                registry.dispatch(entity, listener);
                             } catch (Exception e) {
                                 log.error("接收SSE异常:{}", e.getMessage());
                                 listener.onError(new RuntimeException(data, e));
@@ -136,7 +143,7 @@ public class AgentClient {
      * @param agentMethod 请求配置注解
      * @param requestBody 请求体
      * @param apiKey      API key (passed from caller to avoid ThreadLocal issues with async)
-     * @param baseUrl
+     * @param baseUrl     基础请求路径
      * @return 请求包装
      */
     private Request getRequest(AgentMethod agentMethod, Object requestBody, String apiKey, String baseUrl) {

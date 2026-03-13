@@ -3,7 +3,7 @@ package cn.gransier.config;
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.annotation.AgentParam;
 import cn.gransier.context.AgentContext;
-import cn.gransier.listener.FluxDifyStreamListener;
+import cn.gransier.config.listener.FluxStreamListener;
 import cn.gransier.util.AgentClient;
 import cn.gransier.util.TypeUtils;
 import lombok.NonNull;
@@ -114,7 +114,7 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
                 apiKey,
                 baseUrl,
                 requestBody,
-                FluxDifyStreamListener.newInstance(sink, TypeUtils.getGenericReturnType(method, 0))
+                FluxStreamListener.newInstance(sink, TypeUtils.getGenericReturnType(method, 0))
         ));
     }
 
