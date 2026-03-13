@@ -16,7 +16,7 @@ import reactor.core.publisher.Flux;
 
 import javax.annotation.Resource;
 
-@Api(tags = "DifyAgent对话接口-mini")
+@Api(tags = "DifyAgent对话接口")
 @Slf4j
 @RestController
 @RequestMapping("/ai-cloud/chat")
