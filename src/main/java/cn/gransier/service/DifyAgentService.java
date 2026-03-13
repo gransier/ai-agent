@@ -12,15 +12,15 @@ import reactor.core.publisher.Flux;
 @AgentService
 public interface DifyAgentService {
 
-    @AgentMethod(apiKey = "app-gItXxmtOzXp7S6TdJb7TNcdF", endpoint = "/chat-messages", method = AgentMethods.POST)
+    @AgentMethod(endpoint = "/chat-messages", method = AgentMethods.POST)
     Flux<String> completions(DifyChatQuery difyQuery);
 
-    @AgentMethod(apiKey = "app-gItXxmtOzXp7S6TdJb7TNcdF", endpoint = "/conversations", method = AgentMethods.GET)
+    @AgentMethod(endpoint = "/conversations", method = AgentMethods.GET)
     Object conversations(DifyConversationsQuery difyQuery);
 
-    @AgentMethod(apiKey = "app-gItXxmtOzXp7S6TdJb7TNcdF", endpoint = "/messages", method = AgentMethods.GET)
+    @AgentMethod(endpoint = "/messages", method = AgentMethods.GET)
     Object messages(DifyMessagesQuery difyQuery);
 
-    @AgentMethod(apiKey = "app-gItXxmtOzXp7S6TdJb7TNcdF", endpoint = "/conversations/{conversation_id}", method = AgentMethods.DELETE)
+    @AgentMethod(endpoint = "/conversations/{conversation_id}", method = AgentMethods.DELETE)
     void deleteConversations(@AgentParam("conversation_id") String conversationId);
 }

@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface AgentMethod {
-    String apiKey();
     String endpoint();
     AgentMethods method();
 }

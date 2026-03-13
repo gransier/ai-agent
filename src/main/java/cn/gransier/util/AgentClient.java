@@ -2,6 +2,7 @@ package cn.gransier.util;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.config.AgentProperties;
+import cn.gransier.context.ApiKeyContext;
 import cn.gransier.domain.response.DifyChatResponse;
 import cn.gransier.enums.AgentMethods;
 import cn.gransier.listener.DifyStreamListener;
@@ -56,7 +57,7 @@ public class AgentClient {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 String errorMsg = response.body() != null ? response.body().string() : "Unknown error";
-                throw new RuntimeException("HTTP request failed with code " + response.code() + ": " + errorMsg);
+                throw new RuntimeException(errorMsg);
             }
 
             ResponseBody body = response.body();
@@ -148,7 +149,12 @@ public class AgentClient {
      * @return 请求包装
      */
     private Request getRequest(AgentMethod agentMethod, Object requestBody) {
-        String apiKey = agentMethod.apiKey();
+        // Get API key from ThreadLocal context, fallback to annotation if not present
+        String apiKey = ApiKeyContext.getApiKey();
+        if (!StringUtils.hasText(apiKey)) {
+            throw new RuntimeException("请求头缺失apiKey...");
+        }
+        
         AgentMethods method = agentMethod.method();
         String endpoint = agentMethod.endpoint();
 
