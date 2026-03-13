@@ -15,7 +15,7 @@ import java.util.Map;
 public class AgentClientTest {
     @Test
     public void testStream() {
-        AgentClient difyClient = new AgentClient();
+        AgentClient difyClient = new AgentClient(null);
 
         // 方式 1：使用动态代理创建注解实例
         AgentMethod agentMethod = createAgentMethod(
@@ -48,7 +48,7 @@ public class AgentClientTest {
 
     @Test
     public void testHttp() {
-        AgentClient difyClient = new AgentClient();
+        AgentClient difyClient = new AgentClient(null);
         AgentMethod agentMethod = createAgentMethod(
                 "/conversations",
                 AgentMethods.GET

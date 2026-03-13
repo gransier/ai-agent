@@ -18,7 +18,7 @@ import javax.annotation.Resource;
 @Api(tags = "DifyAgent对话接口-mini")
 @Slf4j
 @RestController
-@RequestMapping("/mini/ai-cloud/chat")
+@RequestMapping("/ai-cloud/chat")
 public class DifyAgentController {
 
     @Resource
@@ -28,7 +28,7 @@ public class DifyAgentController {
     @PostMapping(value = "/completions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseBody
     @SneakyThrows
-    public Flux<String> completions(ChatCompleteQuery query) {
+    public Flux<String> completions(@RequestBody ChatCompleteQuery query) {
         DifyChatQuery difyQuery = new DifyChatQuery(query.getContent(), query.getUser(), query.getConversation_id(), query.isStream());
 
         return difyAgentService.completions(difyQuery);

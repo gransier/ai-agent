@@ -1,6 +1,7 @@
 package cn.gransier.util;
 
 import cn.gransier.annotation.AgentMethod;
+import cn.gransier.config.AgentProperties;
 import cn.gransier.domain.response.DifyChatResponse;
 import cn.gransier.enums.AgentMethods;
 import cn.gransier.listener.DifyStreamListener;
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -25,23 +27,20 @@ public class AgentClient {
 
     private final OkHttpClient httpClient;
 
-    private String baseUrl = "http://192.168.2.207/v1/";
+    private final String baseUrl;
 
     /**
      * 构造函数：允许自定义 OkHttp 客户端（用于超时、拦截器等）
      */
-    public AgentClient() {
-        this(new OkHttpClient.Builder()
-                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(5, java.util.concurrent.TimeUnit.MINUTES)
-                .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                .callTimeout(10, java.util.concurrent.TimeUnit.MINUTES)
+    public AgentClient(AgentProperties properties) {
+        this.baseUrl = properties.getBaseUrl();
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(properties.getConnectTimeout(), TimeUnit.SECONDS)
+                .readTimeout(properties.getReadTimeout(), TimeUnit.SECONDS)
+                .writeTimeout(properties.getWriteTimeout(), TimeUnit.SECONDS)
+                .callTimeout(properties.getCallTimeout(), TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
-                .build());
-    }
-
-    public AgentClient(OkHttpClient httpClient) {
-        this.httpClient = httpClient;
+                .build();
     }
 
 
@@ -141,7 +140,13 @@ public class AgentClient {
         });
     }
 
-
+    /**
+     * 构建请求
+     *
+     * @param agentMethod 请求配置注解
+     * @param requestBody 请求体
+     * @return 请求包装
+     */
     private Request getRequest(AgentMethod agentMethod, Object requestBody) {
         String apiKey = agentMethod.apiKey();
         AgentMethods method = agentMethod.method();
@@ -177,20 +182,11 @@ public class AgentClient {
                     jsonBody);
 
             switch (method) {
-                case POST:
-                    requestBuilder.post(body);
-                    break;
-                case PUT:
-                    requestBuilder.put(body);
-                    break;
-                case DELETE:
-                    requestBuilder.delete(body);
-                    break;
-                case PATCH:
-                    requestBuilder.patch(body);
-                    break;
-                default:
-                    requestBuilder.method(method.name(), body);
+                case POST -> requestBuilder.post(body);
+                case PUT -> requestBuilder.put(body);
+                case DELETE -> requestBuilder.delete(body);
+                case PATCH -> requestBuilder.patch(body);
+                default -> requestBuilder.method(method.name(), body);
             }
         }
 
