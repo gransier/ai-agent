@@ -28,7 +28,6 @@ public class FluxStreamListener<T> implements StreamListener<T> {
 
     @Override
     public void onComplete(T complete) {
-        onMessage(complete);
         sink.complete();
     }
 

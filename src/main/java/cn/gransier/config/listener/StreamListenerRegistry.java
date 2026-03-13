@@ -18,6 +18,7 @@ public class StreamListenerRegistry {
         @SuppressWarnings("unchecked")
         StreamListenerTemplate<T> template = (StreamListenerTemplate<T>) registry.get(listener.getType());
         if (template != null) {
+            template.setListener(listener);
             template.process(line, listener);
         }
     }

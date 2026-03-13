@@ -16,7 +16,6 @@ public abstract class StreamListenerTemplate<T> {
     private StreamListener<T> listener;
 
     public void process(String line, StreamListener<T> listener) {
-        setListener(listener);
         // 预处理
         Optional<String> opt = preHandle(line);
         if (opt.isEmpty()) {
@@ -27,12 +26,13 @@ public abstract class StreamListenerTemplate<T> {
             // 解析json
             T entity = JsonUtils.parseJson(json, listener.getType());
             if (isEnd(entity)) {
+                listener.onMessage(entity);
                 listener.onComplete(entity);
                 return;
             }
             handle(entity);
         } catch (Exception e) {
-            log.error("接收SSE异常:{}", e.getMessage());
+            log.error("接收SSE异常:{} json:{}", e.getMessage(), json);
             listener.onError(new RuntimeException(json, e));
         }
     }

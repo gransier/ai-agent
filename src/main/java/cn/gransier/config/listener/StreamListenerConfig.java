@@ -1,11 +1,8 @@
 package cn.gransier.config.listener;
 
 import cn.gransier.domain.response.DifyChatResponse;
-import cn.gransier.domain.response.GlmChatCompletionResponse;
-import cn.gransier.util.JsonUtils;
-import jakarta.validation.constraints.Null;
+import cn.gransier.domain.response.GlmChatResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
@@ -55,22 +52,47 @@ public class StreamListenerConfig {
         });
 
 
-        registry.register(GlmChatCompletionResponse.class, new StreamListenerTemplate<>() {
+        registry.register(GlmChatResponse.class, new StreamListenerTemplate<>() {
             @Override
-            protected boolean isEnd(GlmChatCompletionResponse entity) {
+            protected Optional<String> preHandle(String line) {
+                if (line.startsWith("data: ")) {
+                    String data = line.substring(6).trim();
+                    if ("[DONE]".equals(data)) {
+                        getListener().onComplete(new GlmChatResponse());
+                        return Optional.empty();
+                    }
+                    return Optional.of(data);
+                } else {
+                    if (StringUtils.hasText(line) && !"event: ping".equals(line)) {
+                        // 异常信息
+                        return Optional.of(line);
+                    }
+                }
+                return Optional.empty();
+            }
+
+            @Override
+            protected boolean isEnd(GlmChatResponse entity) {
                 if (entity.getError() != null) {
-                    handle(entity);
                     return true;
                 }
-                for (GlmChatCompletionResponse.Choice choice : entity.getChoices()) {
+                for (GlmChatResponse.Choice choice : entity.getChoices()) {
                     if ("stop".equals(choice.getFinishReason())) {
                         getListener().onComplete(entity);
                         return true;
-                    } else {
-                        handle(entity);
                     }
                 }
                 return false;
+            }
+
+            @Override
+            protected void handle(GlmChatResponse entity) {
+                for (GlmChatResponse.Choice choice : entity.getChoices()) {
+                    String reasoningContent = choice.getDelta().getReasoningContent();
+                    String content = reasoningContent != null ? reasoningContent : choice.getDelta().getContent();
+                    System.out.print(content == null ? "" : content);
+                }
+                getListener().onMessage(entity);
             }
         });
     }

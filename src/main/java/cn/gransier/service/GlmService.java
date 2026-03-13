@@ -2,7 +2,7 @@ package cn.gransier.service;
 
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.annotation.AgentService;
-import cn.gransier.domain.response.GlmChatCompletionResponse;
+import cn.gransier.domain.response.GlmChatResponse;
 import cn.gransier.enums.AgentMethods;
 import reactor.core.publisher.Flux;
 
@@ -10,5 +10,5 @@ import reactor.core.publisher.Flux;
 public interface GlmService {
 
     @AgentMethod(endpoint = "/chat/completions", method = AgentMethods.POST)
-    Flux<GlmChatCompletionResponse> completions(Object query);
+    Flux<GlmChatResponse> completions(Object query);
 }

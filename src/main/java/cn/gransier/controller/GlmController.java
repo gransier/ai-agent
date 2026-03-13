@@ -1,12 +1,6 @@
 package cn.gransier.controller;
 
-import cn.gransier.domain.query.ChatCompleteQuery;
-import cn.gransier.domain.query.DifyChatQuery;
-import cn.gransier.domain.query.DifyConversationsQuery;
-import cn.gransier.domain.query.DifyMessagesQuery;
-import cn.gransier.domain.response.DifyChatResponse;
-import cn.gransier.domain.response.GlmChatCompletionResponse;
-import cn.gransier.service.DifyAgentService;
+import cn.gransier.domain.response.GlmChatResponse;
 import cn.gransier.service.GlmService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,7 +25,7 @@ public class GlmController {
     @PostMapping(value = "/completions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseBody
     @SneakyThrows
-    public Flux<GlmChatCompletionResponse> completions(@RequestBody Object query) {
+    public Flux<GlmChatResponse> completions(@RequestBody Object query) {
 
         return glmService.completions(query);
     }
