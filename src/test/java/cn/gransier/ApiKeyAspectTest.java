@@ -24,8 +24,8 @@ public class ApiKeyAspectTest {
 
     @Test
     public void testAgentClientWithContext() {
-        AgentClient client = new AgentClient(null);
-        
+        AgentClient client = new AgentClient(null, null, null);
+
         // Create a mock AgentMethod annotation
         AgentMethod agentMethod = (AgentMethod) Proxy.newProxyInstance(
                 ApiKeyAspectTest.class.getClassLoader(),
@@ -44,7 +44,7 @@ public class ApiKeyAspectTest {
         // that the context is accessible
         String contextKey = AgentContext.getApiKey();
         assert contextKey.equals("context-key") : "Expected context-key, got " + contextKey;
-        
+
         AgentContext.clear();
     }
 }

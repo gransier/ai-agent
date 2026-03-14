@@ -15,6 +15,8 @@ public abstract class StreamListenerTemplate<T> {
 
     private StreamListener<T> listener;
 
+    abstract public Class<T> getType();
+
     public void process(String line, StreamListener<T> listener) {
         // 预处理
         Optional<String> opt = preHandle(line);
@@ -37,14 +39,14 @@ public abstract class StreamListenerTemplate<T> {
         }
     }
 
-    protected Optional<String> preHandle(String line) {
-        return Optional.of(line);
-    }
+    abstract protected Optional<String> preHandle(String line);
 
     abstract protected boolean isEnd(T entity);
 
-    protected void handle(T entity) {
-        getListener().onMessage(entity);
-    }
+    abstract protected void handle(T entity);
 
+    public static <T> void registerUnchecked(StreamListenerRegistry registry, StreamListenerTemplate<T> template) {
+        Class<T> type = template.getType();
+        registry.register(type, template);
+    }
 }

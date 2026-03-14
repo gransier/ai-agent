@@ -18,7 +18,7 @@ public class AgentClientTest {
 
     @Test
     public void testStream() {
-        AgentClient difyClient = new AgentClient(null);
+        AgentClient difyClient = new AgentClient(null, null, null);
 
         // 方式 1：使用动态代理创建注解实例
         AgentMethod agentMethod = createAgentMethod(
@@ -61,7 +61,7 @@ public class AgentClientTest {
 
     @Test
     public void testHttp() {
-        AgentClient difyClient = new AgentClient(null);
+        AgentClient difyClient = new AgentClient(null, null, null);
         AgentMethod agentMethod = createAgentMethod(
                 "/conversations",
                 AgentMethods.GET

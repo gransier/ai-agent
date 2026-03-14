@@ -3,6 +3,7 @@ package cn.gransier.util;
 import cn.gransier.annotation.AgentMethod;
 import cn.gransier.config.AgentProperties;
 import cn.gransier.config.listener.StreamListenerRegistry;
+import cn.gransier.config.listener.StreamListenerTemplate;
 import cn.gransier.enums.AgentMethods;
 import cn.gransier.config.listener.StreamListener;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -13,12 +14,12 @@ import okhttp3.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -30,13 +31,12 @@ public class AgentClient {
 
     private final String baseUrl;
 
-    @Resource
-    private StreamListenerRegistry registry;
+    private final StreamListenerRegistry registry;
 
     /**
      * 构造函数：允许自定义 OkHttp 客户端（用于超时、拦截器等）
      */
-    public AgentClient(AgentProperties properties) {
+    public AgentClient(AgentProperties properties, StreamListenerRegistry registry, List<StreamListenerTemplate<?>> templates) {
         this.baseUrl = properties.getBaseUrl();
         this.httpClient = new OkHttpClient.Builder()
                 .connectTimeout(properties.getConnectTimeout(), TimeUnit.SECONDS)
@@ -45,6 +45,10 @@ public class AgentClient {
                 .callTimeout(properties.getCallTimeout(), TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
+        this.registry = registry;
+        for (StreamListenerTemplate<?> template : templates) {
+            StreamListenerTemplate.registerUnchecked(registry, template);
+        }
     }
 
 
