@@ -30,12 +30,11 @@ public class AgentAspect {
 
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
-            String authHeader = request.getHeader("Authorization");
-            String apiKey = null;
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                apiKey = authHeader.substring(7);
+            String difyToken = request.getHeader("DifyToken");
+            if (difyToken != null) {
+                AgentContext.setApiKey(difyToken);
             }
-            AgentContext.setApiKey(apiKey);
+
             return joinPoint.proceed();
         } finally {
             AgentContext.clear();

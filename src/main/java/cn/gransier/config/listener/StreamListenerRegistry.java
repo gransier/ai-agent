@@ -1,10 +1,12 @@
 package cn.gransier.config.listener;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class StreamListenerRegistry {
 
@@ -20,6 +22,9 @@ public class StreamListenerRegistry {
         if (template != null) {
             template.setListener(listener);
             template.process(line, listener);
+        } else {
+            log.warn("No template found for type: {}", listener.getType().getName());
+            listener.onError(new IllegalArgumentException("No template found for type: " + listener.getType().getName()));
         }
     }
 }
