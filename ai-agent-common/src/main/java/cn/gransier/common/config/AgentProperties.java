@@ -39,4 +39,19 @@ public class AgentProperties {
      */
     private boolean retryOnConnectionFailureTimeout;
 
+    /**
+     * Function Calling 最大调用深度
+     */
+    private int maxCallDepth = 10;
+
+    /**
+     * Function Calling 单轮最大工具调用数
+     */
+    private int maxToolsPerTurn = 5;
+
+    /**
+     * 工具执行超时时间 (毫秒)
+     */
+    private long toolExecutionTimeout = 30000;
+
 }
