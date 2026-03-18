@@ -1,16 +1,16 @@
 package cn.gransier.common.domain;
 
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 @SuppressWarnings("unused")
+@Slf4j
 @Getter
 public class ApiResult<T> implements Serializable {
-    private static final Logger logger = LoggerFactory.getLogger(ApiResult.class);
+
     @Serial
     private static final long serialVersionUID = 1L;
     private String code = "500";
@@ -39,22 +39,22 @@ public class ApiResult<T> implements Serializable {
     }
 
     public static <T> ApiResult<T> error() {
-        logger.debug("返回错误：code={}, msg={}", ResultEnum.ERROR.getCode(), ResultEnum.ERROR.getDesc());
+        log.debug("返回错误：code={}, msg={}", ResultEnum.ERROR.getCode(), ResultEnum.ERROR.getDesc());
         return new ApiResult<>(ResultEnum.ERROR.getCode(), ResultEnum.ERROR.getDesc(), null);
     }
 
     public static <T> ApiResult<T> error(String msg) {
-        logger.debug("返回错误：code={}, msg={}", ResultEnum.ERROR.getCode(), msg);
+        log.debug("返回错误：code={}, msg={}", ResultEnum.ERROR.getCode(), msg);
         return new ApiResult<>(ResultEnum.ERROR.getCode(), msg, null);
     }
 
     public static <T> ApiResult<T> error(ResultEnum resultEnum) {
-        logger.debug("返回错误：code={}, msg={}", resultEnum.getCode(), resultEnum.getDesc());
+        log.debug("返回错误：code={}, msg={}", resultEnum.getCode(), resultEnum.getDesc());
         return new ApiResult<>(resultEnum.getCode(), resultEnum.getDesc(), null);
     }
 
     public static <T> ApiResult<T> error(String code, String msg) {
-        logger.debug("返回错误：code={}, msg={}", code, msg);
+        log.debug("返回错误：code={}, msg={}", code, msg);
         return new ApiResult<>(code, msg, null);
     }
 
