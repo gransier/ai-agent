@@ -39,3 +39,15 @@ oss:
   access-key: admin
   secret-key: 12qw!@QW
   bucket-name: workspace
+
+conversation:
+  enabled: true
+  max-context-tokens: 128000
+  max-messages: 100
+  compression-threshold: 100000
+  compression-ratio: 0.3
+  auto-title: true
+  persist-enabled: false
+  session-timeout-minutes: 60
+  max-sessions-per-user: 50
+  storage-type: memory
