@@ -25,7 +25,10 @@
         <dependency>
             <groupId>cn.gransier</groupId>
             <artifactId>ai-agent-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.gransier</groupId>
+            <artifactId>ai-agent-oss</artifactId>
         </dependency>
 
         <dependency>

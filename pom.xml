@@ -10,6 +10,7 @@
     <name>ai-agent</name>
     <modules>
         <module>ai-agent-common</module>
+        <module>ai-agent-oss</module>
         <module>ai-agent-server</module>
     </modules>
 
@@ -29,6 +30,17 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>cn.gransier</groupId>
+                <artifactId>ai-agent-common</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.gransier</groupId>
+                <artifactId>ai-agent-oss</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -83,6 +95,12 @@
                 <groupId>jakarta.validation</groupId>
                 <artifactId>jakarta.validation-api</artifactId>
                 <version>${validation.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>8.2.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
