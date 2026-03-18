@@ -107,7 +107,7 @@ public class AgentClient {
             }
 
             String responseBody = body.string();
-            if (responseType == String.class || responseType == Object.class) {
+            if (responseType == String.class) {
                 @SuppressWarnings("unchecked")
                 T stringResponse = (T) responseBody;
                 return stringResponse;
