@@ -8,6 +8,30 @@ agent:
   write-timeout: 30
   call-timeout: 600
   retry-on-connection-failure-timeout: true
+  max-call-depth: 10
+  max-tools-per-turn: 5
+  tool-execution-timeout: 30000
+
+mcp:
+  enabled: true
+  connection-timeout: 30
+  request-timeout: 60
+  servers:
+    - name: filesystem
+      type: stdio
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-filesystem"
+        - "/tmp"
+      enabled: false
+    - name: memory
+      type: stdio
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-memory"
+      enabled: false
 
 oss:
   type: minio
