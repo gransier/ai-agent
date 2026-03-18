@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -15,6 +16,7 @@ public class DifyChatQuery {
     private Map<String, Object> inputs = Map.of();
     @ApiModelProperty("用户输入/提问内容")
     private String query;
+
     @ApiModelProperty("streaming:流式 blocking：阻塞")
     private String response_mode;
     @ApiModelProperty("用户标识")
@@ -22,36 +24,19 @@ public class DifyChatQuery {
     @ApiModelProperty("（选填）会话 ID，需要基于之前的聊天记录继续对话，必须传之前消息的 conversation_id。")
     private String conversation_id;
 
-    public DifyChatQuery() {
-    }
+    @ApiModelProperty(value = "文件列表")
+    private List<File> files;
 
-    public DifyChatQuery(String query, String user, String conversation_id) {
-        this.query = query;
-        this.user = user;
-        this.conversation_id = conversation_id;
-        this.response_mode = "streaming";
-    }
 
-    public DifyChatQuery(String query, String user, String conversation_id, boolean stream) {
-        this.query = query;
-        this.user = user;
-        this.conversation_id = conversation_id;
-        if (stream) {
-            this.response_mode = "streaming";
-        } else {
-            this.response_mode = "blocking";
-        }
-    }
+    @Data
+    public static class File {
 
-    public DifyChatQuery(Map<String, Object> inputs, String query, boolean stream, String user, String conversation_id) {
-        this.inputs = inputs;
-        this.query = query;
-        if (stream) {
-            this.response_mode = "streaming";
-        } else {
-            this.response_mode = "blocking";
-        }
-        this.user = user;
-        this.conversation_id = conversation_id;
+        private String type;
+
+        private String transferMethod;
+
+        private String uploadFileId;
+
+        private String url;
     }
 }

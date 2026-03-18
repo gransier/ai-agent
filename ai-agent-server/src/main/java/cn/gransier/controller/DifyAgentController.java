@@ -1,10 +1,11 @@
 package cn.gransier.controller;
 
-import cn.gransier.domain.query.ChatCompleteQuery;
+import cn.gransier.common.domain.ApiResult;
 import cn.gransier.domain.query.DifyChatQuery;
 import cn.gransier.domain.query.DifyConversationsQuery;
 import cn.gransier.domain.query.DifyMessagesQuery;
 import cn.gransier.domain.response.DifyChatResponse;
+import cn.gransier.domain.response.DifyUploadFileResponse;
 import cn.gransier.service.DifyAgentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +13,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Resource;
@@ -29,28 +31,27 @@ public class DifyAgentController {
     @PostMapping(value = "/completions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseBody
     @SneakyThrows
-    public Flux<DifyChatResponse> completions(@RequestBody ChatCompleteQuery query) {
-        DifyChatQuery difyQuery = new DifyChatQuery(query.getContent(), query.getUser(), query.getConversation_id(), query.isStream());
+    public Flux<DifyChatResponse> completions(@RequestBody DifyChatQuery query) {
 
-        return difyAgentService.completions(difyQuery);
+        return difyAgentService.completions(query);
     }
 
     @ApiOperation("会话列表")
     @GetMapping("/conversations")
     @ResponseBody
     @SneakyThrows
-    public Object conversations(DifyConversationsQuery difyQuery) {
+    public ApiResult<?> conversations(DifyConversationsQuery difyQuery) {
 
-        return difyAgentService.conversations(difyQuery);
+        return ApiResult.success(difyAgentService.conversations(difyQuery));
     }
 
     @ApiOperation("会话历史消息")
     @GetMapping("/messages")
     @ResponseBody
     @SneakyThrows
-    public Object messages(DifyMessagesQuery difyQuery) {
+    public ApiResult<?> messages(DifyMessagesQuery difyQuery) {
 
-        return difyAgentService.messages(difyQuery);
+        return ApiResult.success(difyAgentService.messages(difyQuery));
     }
 
     @ApiOperation("删除会话")
@@ -62,4 +63,10 @@ public class DifyAgentController {
         difyAgentService.deleteConversations(conversation_id);
     }
 
+    @ApiOperation("文件上传接口")
+    @PostMapping("/files/upload")
+    public ApiResult<DifyUploadFileResponse> uploadFiles(@RequestParam("file") MultipartFile file, @RequestParam("user") String user) {
+
+        return ApiResult.success(difyAgentService.uploadFiles(file, user));
+    }
 }

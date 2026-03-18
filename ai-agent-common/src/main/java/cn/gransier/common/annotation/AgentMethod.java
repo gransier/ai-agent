@@ -12,4 +12,5 @@ import java.lang.annotation.Target;
 public @interface AgentMethod {
     String endpoint();
     AgentMethods method();
+    String contentType() default "application/json";
 }

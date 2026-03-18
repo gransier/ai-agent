@@ -6,6 +6,7 @@ import cn.gransier.common.config.listener.FluxStreamListener;
 import cn.gransier.common.context.AgentContext;
 import cn.gransier.common.util.TypeUtils;
 import cn.gransier.common.util.AgentClient;
+import cn.gransier.common.util.UploadUtils;
 import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -70,11 +71,14 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
         }
 
         AgentMethod annotation = method.getAnnotation(AgentMethod.class);
-        if (method.getReturnType() == Flux.class) {
-            if (annotation != null) {
-                return handleAgentFlux(method, args, annotation);
-            }
+        if (annotation == null) {
             throw new RuntimeException("代理方法必须使用@AgentMethod注解");
+        }
+        if ("multipart/form-data".equals(annotation.contentType())) {
+            return handleUpload(method, args, annotation);
+        }
+        if (method.getReturnType() == Flux.class) {
+            return handleAgentFlux(method, args, annotation);
         }
         return handleHttp(method, args, annotation);
     }
@@ -125,5 +129,13 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
         String baseUrl = AgentContext.getBaseUrl();
 
         return agentClient.http(annotation, apiKey, baseUrl, requestBody, method.getReturnType());
+    }
+
+    private Object handleUpload(Method method, Object[] args, AgentMethod annotation) {
+        AgentClient agentClient = getDifyClient();
+        String apiKey = AgentContext.getApiKey();
+        String baseUrl = AgentContext.getBaseUrl();
+
+        return agentClient.upload(annotation, apiKey, baseUrl, method.getReturnType(), UploadUtils.getMultipartBody(method, args));
     }
 }

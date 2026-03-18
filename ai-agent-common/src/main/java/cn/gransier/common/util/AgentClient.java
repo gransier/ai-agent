@@ -55,14 +55,46 @@ public class AgentClient {
     /**
      * 通用 HTTP 调用方法（同步）
      *
-     * @param annotation  注解配置（包含 endpoint、method）
-     * @param apiKey      token
-     * @param baseUrl     基础请求路径
-     * @param requestBody 请求体
+     * @param annotation   注解配置（包含 endpoint、method）
+     * @param apiKey       token
+     * @param baseUrl      基础请求路径
+     * @param requestBody  请求体
+     * @param responseType 返回类型
      * @return 响应结果
      */
     public <T> T http(AgentMethod annotation, String apiKey, String baseUrl, Object requestBody, Class<T> responseType) {
         Request request = getRequest(annotation, requestBody, apiKey, baseUrl);
+        return doExecute(responseType, request);
+    }
+
+    /**
+     * 通用上传方法
+     *
+     * @param annotation    注解配置（包含 endpoint、method）
+     * @param apiKey        token
+     * @param baseUrl       基础请求路径
+     * @param responseType  返回类型
+     * @param multipartBody 请求体
+     */
+    public <T> T upload(AgentMethod annotation, String apiKey, String baseUrl, Class<T> responseType, MultipartBody multipartBody) {
+        String endpoint = annotation.endpoint();
+        String fullUrl = buildFullUrl(baseUrl, endpoint);
+        Request request = new Request.Builder()
+                .url(fullUrl)
+                .post(multipartBody)
+                .addHeader("Authorization", "Bearer " + apiKey)
+                .build();
+
+        return doExecute(responseType, request);
+    }
+
+    /**
+     * 执行 HTTP 请求
+     *
+     * @param responseType 响应类型
+     * @param request      请求参数
+     */
+    private <T> T doExecute(Class<T> responseType, Request request) {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 String errorMsg = response.body() != null ? response.body().string() : "Unknown error";
@@ -75,7 +107,7 @@ public class AgentClient {
             }
 
             String responseBody = body.string();
-            if (responseType == String.class) {
+            if (responseType == String.class || responseType == Object.class) {
                 @SuppressWarnings("unchecked")
                 T stringResponse = (T) responseBody;
                 return stringResponse;
@@ -241,5 +273,4 @@ public class AgentClient {
 
         return queryString.toString();
     }
-
 }

@@ -8,6 +8,8 @@ import cn.gransier.domain.query.DifyConversationsQuery;
 import cn.gransier.domain.query.DifyMessagesQuery;
 import cn.gransier.domain.response.DifyChatResponse;
 import cn.gransier.common.enums.AgentMethods;
+import cn.gransier.domain.response.DifyUploadFileResponse;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 @AgentService
@@ -24,4 +26,7 @@ public interface DifyAgentService {
 
     @AgentMethod(endpoint = "/conversations/{conversation_id}", method = AgentMethods.DELETE)
     void deleteConversations(@AgentParam("conversation_id") String conversationId);
+
+    @AgentMethod(endpoint = "/files/upload", method = AgentMethods.POST, contentType = "multipart/form-data")
+    DifyUploadFileResponse uploadFiles(@AgentParam("file") MultipartFile file, @AgentParam("user") String user);
 }

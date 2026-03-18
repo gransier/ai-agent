@@ -26,6 +26,9 @@
         <okhttp.version>3.14.9</okhttp.version>
         <reactor.version>3.4.24</reactor.version>
         <validation.version>3.0.2</validation.version>
+
+        <minio.version>8.2.2</minio.version>
+        <tika.version>1.24</tika.version>
     </properties>
 
     <dependencyManagement>
@@ -100,7 +103,13 @@
             <dependency>
                 <groupId>io.minio</groupId>
                 <artifactId>minio</artifactId>
-                <version>8.2.2</version>
+                <version>${minio.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+                <version>${tika.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

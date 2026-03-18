@@ -11,7 +11,7 @@ agent:
 
 oss:
   type: minio
-  endpoint: http://localhost:9000/
+  endpoint: http://192.168.2.83:9000/
   access-key: admin
   secret-key: 12qw!@QW
   bucket-name: workspace

@@ -27,7 +27,7 @@ public class AgentClientTest {
         );
 
         // 构建请求参数
-        DifyChatQuery difyChatQuery = new DifyChatQuery("hello", "user-123", "");
+        DifyChatQuery difyChatQuery = new DifyChatQuery();
 
         // Set API key in ThreadLocal context (simulating interceptor behavior)
         AgentContext.setApiKey("test-api-key-from-header");
