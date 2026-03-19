@@ -3,6 +3,7 @@ package cn.gransier.common.config;
 import cn.gransier.common.annotation.AgentMethod;
 import cn.gransier.common.annotation.AgentParam;
 import cn.gransier.common.config.listener.FluxStreamListener;
+import cn.gransier.common.consts.AgentConst;
 import cn.gransier.common.context.AgentContext;
 import cn.gransier.common.util.TypeUtils;
 import cn.gransier.common.util.AgentClient;
@@ -74,7 +75,7 @@ public class AgentServiceFactoryBean implements FactoryBean<Object>, InvocationH
         if (annotation == null) {
             throw new RuntimeException("代理方法必须使用@AgentMethod注解");
         }
-        if ("multipart/form-data".equals(annotation.contentType())) {
+        if (AgentConst.MULTIPART_FORM_DATA.equals(annotation.contentType())) {
             return handleUpload(method, args, annotation);
         }
         if (method.getReturnType() == Flux.class) {

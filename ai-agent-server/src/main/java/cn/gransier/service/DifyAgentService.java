@@ -3,6 +3,7 @@ package cn.gransier.service;
 import cn.gransier.common.annotation.AgentMethod;
 import cn.gransier.common.annotation.AgentParam;
 import cn.gransier.common.annotation.AgentService;
+import cn.gransier.common.consts.AgentConst;
 import cn.gransier.domain.query.DifyChatQuery;
 import cn.gransier.domain.query.DifyConversationsQuery;
 import cn.gransier.domain.query.DifyMessagesQuery;
@@ -27,6 +28,6 @@ public interface DifyAgentService {
     @AgentMethod(endpoint = "/conversations/{conversation_id}", method = AgentMethods.DELETE)
     void deleteConversations(@AgentParam("conversation_id") String conversationId);
 
-    @AgentMethod(endpoint = "/files/upload", method = AgentMethods.POST, contentType = "multipart/form-data")
+    @AgentMethod(endpoint = "/files/upload", method = AgentMethods.POST, contentType = AgentConst.MULTIPART_FORM_DATA)
     DifyUploadFileResponse uploadFiles(@AgentParam("file") MultipartFile file, @AgentParam("user") String user);
 }
