@@ -17,8 +17,8 @@ public class DifyChatQuery {
     @ApiModelProperty("用户输入/提问内容")
     private String query;
 
-    @ApiModelProperty("streaming:流式 blocking：阻塞")
-    private String response_mode;
+    @ApiModelProperty("streaming:流式")
+    private final String response_mode = "streaming";
     @ApiModelProperty("用户标识")
     private String user;
     @ApiModelProperty("（选填）会话 ID，需要基于之前的聊天记录继续对话，必须传之前消息的 conversation_id。")
@@ -33,9 +33,9 @@ public class DifyChatQuery {
 
         private String type;
 
-        private String transferMethod;
+        private String transfer_method;
 
-        private String uploadFileId;
+        private String upload_file_id;
 
         private String url;
     }
