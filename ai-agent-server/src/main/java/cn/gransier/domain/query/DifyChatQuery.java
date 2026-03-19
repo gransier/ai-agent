@@ -2,6 +2,7 @@ package cn.gransier.domain.query;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -15,11 +16,13 @@ public class DifyChatQuery {
     @JsonInclude
     private Map<String, Object> inputs = Map.of();
     @ApiModelProperty("用户输入/提问内容")
+    @NotBlank(message = "用户输入/提问内容不能为空")
     private String query;
 
     @ApiModelProperty("streaming:流式")
     private final String response_mode = "streaming";
     @ApiModelProperty("用户标识")
+    @NotBlank(message = "用户标识不能为空")
     private String user;
     @ApiModelProperty("（选填）会话 ID，需要基于之前的聊天记录继续对话，必须传之前消息的 conversation_id。")
     private String conversation_id;

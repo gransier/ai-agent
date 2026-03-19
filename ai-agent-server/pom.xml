@@ -26,10 +26,10 @@
             <groupId>cn.gransier</groupId>
             <artifactId>ai-agent-common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>cn.gransier</groupId>
-            <artifactId>ai-agent-oss</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>cn.gransier</groupId>-->
+<!--            <artifactId>ai-agent-oss</artifactId>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
